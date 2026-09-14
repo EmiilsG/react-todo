@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 
-export default function App() {
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState('');
+interface Todo {
+  id: number;
+  text: string;
+}
 
-  const addTodo = () => {
+export default function App() {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [input, setInput] = useState<string>('');
+
+  const addTodo = (): void => {
     if (input.trim()) {
       setTodos([...todos, { id: Date.now(), text: input }]);
       setInput('');
     }
   };
 
-  const deleteTodo = (id) => {
+  const deleteTodo = (id: number): void => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
