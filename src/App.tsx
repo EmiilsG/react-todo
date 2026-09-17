@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import TodoItem from './TodoItem';
+import Spinner from './Spinner';
 
 interface Todo {
   id: number;
@@ -7,68 +9,125 @@ interface Todo {
 
 export default function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState('home');
 
-  const addTodo = (): void => {
-    if (input.trim()) {
+  const addTodo = () => {
+    if (!input.trim()) return;
+
+    setLoading(true);
+
+    setTimeout(() => {
       setTodos([...todos, { id: Date.now(), text: input }]);
       setInput('');
-    }
+      setLoading(false);
+    }, 500);
   };
 
-  const deleteTodo = (id: number): void => {
+  const deleteTodo = (id: number) => {
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const data = new FormData(e.currentTarget);
+
+    console.log({
+      name: data.get('name'),
+      email: data.get('email'),
+      message: data.get('message')
+    });
+  };
+
   return (
-    <div style={{ padding: '30px', maxWidth: '400px', fontFamily: 'Segoe UI, sans-serif', margin: '0 auto' }}>
-      <h3 style={{ color: '#2c3e50', borderBottom: '2px solid #3498db', paddingBottom: '10px' }}>
-        Mana Uzdevumu Kratuve
-      </h3>
+    <div style={{ width: 400, margin: '30px auto', fontFamily: 'Arial' }}>
 
-      <div style={{ marginBottom: '20px', display: 'flex' }}>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ieraksti jaunu merki..."
-          style={{ flexGrow: 1, padding: '10px', borderRadius: '4px 0 0 4px', border: '1px solid #ccc' }}
-        />
-        <button
-          onClick={addTodo}
-          style={{ padding: '10px 15px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '0 4px 4px 0', cursor: 'pointer' }}
-        >
-          Pievienot
-        </button>
-      </div>
+      <nav>
+        <button onClick={() => setPage('home')}>Home</button>
+        <button onClick={() => setPage('about')}>About</button>
+        <button onClick={() => setPage('contact')}>Contact</button>
+      </nav>
 
-      <ul style={{ paddingLeft: 0, listStyle: 'none' }}>
-        {todos.map((todo) => (
-          <li
-            key={todo.id}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '12px 15px',
-              marginBottom: '8px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '6px',
-              borderLeft: '5px solid #3498db',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-              fontWeight: 'bold',
-              color: '#34495e'
-            }}
-          >
-            <span>{todo.text}</span>
-            <button
-              onClick={() => deleteTodo(todo.id)}
-              style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'red', fontWeight: 'bold' }}
-            >
-              Dzest
+      <hr />
+
+      {page === 'home' && (
+        <>
+          <h3>Mani Uzdevumi</h3>
+
+          <div style={{ display: 'flex' }}>
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Ieraksti uzdevumu..."
+              style={{ flex: 1, padding: 8 }}
+            />
+
+            <button onClick={addTodo}>
+              Pievienot
             </button>
-          </li>
-        ))}
-      </ul>
+          </div>
+
+          {loading && <Spinner />}
+
+          <ul style={{ padding: 0, listStyle: 'none' }}>
+            {todos.map(todo => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onDelete={deleteTodo}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+
+      {page === 'about' && (
+        <>
+          <h3>About</h3>
+          <p>
+            Neque porro quisquam est qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit...
+          </p>
+
+        </>
+      )}
+
+      {page === 'contact' && (
+        <>
+          <h3>Contact</h3>
+
+          <form onSubmit={handleSubmit}>
+            <input
+              name="name"
+              placeholder="Vārds"
+              required
+            />
+            <br /><br />
+
+            <input
+              name="email"
+              type="email"
+              placeholder="E-pasts"
+              required
+            />
+            <br /><br />
+
+            <textarea
+              name="message"
+              placeholder="Ziņa"
+              required
+            />
+            <br /><br />
+
+            <button type="submit">
+              Nosūtīt
+            </button>
+          </form>
+        </>
+      )}
+
     </div>
   );
 }
+
